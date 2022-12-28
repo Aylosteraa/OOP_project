@@ -22,6 +22,125 @@ user_id = []
 database_id = []
 command_list = ['/start', '/help', '/insert', '/update', '/delete', '/search', '/sort', '/random', '/saved']
 
+
+class menu_class:
+    def admin_start(self, message):
+        markup = self.menu_keyboard(message)
+        self.bot.send_message(message.chat.id, "Hello! Let's start.\nChoose a command.", reply_markup=markup)
+
+    def not_admin_start(self, message):
+        user_id.clear()
+        user_id.append(message.chat.id)
+        if not self.comics_db.select_user(user_id):
+            self.comics_db.insert_user(user_id[0])
+        else:
+            pass
+        markup = self.menu_keyboard(message)
+        self.bot.send_message(message.chat.id, "Hello! Let's start.\nChoose a command.", reply_markup=markup)
+
+    def help_command(self, message):
+        self.bot.send_message(
+            message.chat.id,
+            "/insert - add new comics\n/delete - delete comics\n/update - update comics\n/search - search comics"
+            "\n/sort - sort comics\n/random - random comics\n/saved - saved comics")
+
+    def not_admin_help_command(self, message):
+        self.bot.send_message(
+            message.chat.id, "/search - search comics"
+                             "\n/sort - sort comics\n/random - random comics\n/saved - saved comics")
+
+    def generate_buttons(self, button_list, markup):
+        for button in button_list:
+            markup.add(types.KeyboardButton(button))
+        return markup
+
+    def create_keyboards(self, button_list, width=2):
+        markup = types.ReplyKeyboardMarkup(row_width=width)
+        markup = self.generate_buttons(button_list, markup)
+        return markup
+
+    def keyboard_insert(self):
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        item1 = types.KeyboardButton('title')
+        item2 = types.KeyboardButton('author')
+        item3 = types.KeyboardButton('artist')
+        item4 = types.KeyboardButton('genre')
+        item5 = types.KeyboardButton('periodicity')
+        item6 = types.KeyboardButton('magazine')
+        item7 = types.KeyboardButton('chapters')
+        item8 = types.KeyboardButton('status')
+        item9 = types.KeyboardButton('colorization')
+        item10 = types.KeyboardButton('kind')
+        item11 = types.KeyboardButton('adaptation')
+        item12 = types.KeyboardButton('translation')
+        item13 = types.KeyboardButton('end')
+        item14 = types.KeyboardButton('menu')
+        markup.add(item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13,
+                   item14)
+        return markup
+
+    def menu_keyboard(self, message):
+        user_id.clear()
+        user_id.append(message.chat.id)
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        if user_id == admin_id:
+            item1 = types.KeyboardButton('/insert')
+            item2 = types.KeyboardButton('/delete')
+            item3 = types.KeyboardButton('/update')
+            item4 = types.KeyboardButton('/search')
+            item5 = types.KeyboardButton('/sort')
+            item6 = types.KeyboardButton('/random')
+            item7 = types.KeyboardButton('/saved')
+            markup.add(item1, item2, item3, item4, item5, item6, item7)
+        else:
+            item4 = types.KeyboardButton('/search')
+            item5 = types.KeyboardButton('/sort')
+            item6 = types.KeyboardButton('/random')
+            item7 = types.KeyboardButton('/saved')
+            markup.add(item4, item5, item6, item7)
+        return markup
+
+    def command_choose(self, message, command):
+        user_id.clear()
+        user_id.append(message.chat.id)
+        if command == '/start':
+            if user_id == admin_id:
+                self.admin_start(message)
+            else:
+                self.not_admin_start(message)
+        elif command == '/help':
+            if user_id == admin_id:
+                self.help_command(message)
+            else:
+                self.not_admin_help_command(message)
+        elif command == '/insert':
+            self.insert_command(message)
+        elif command == '/update':
+            self.update_command(message)
+        elif command == '/delete':
+            self.delete_command(message)
+        elif command == '/search':
+            self.print_command(message)
+            self.menu_command(message)
+        elif command == '/sort':
+            self.sort_command(message)
+        elif command == '/random':
+            self.random_command(message)
+            self.menu_command(message)
+        elif command == '/saved':
+            self.saved_command(message)
+        else:
+            pass
+
+    def menu_command(self, message):
+        markup = self.menu_keyboard(message)
+        self.bot.send_message(message.chat.id, "Choose a command.", reply_markup=markup)
+
+    def return_to_main(self, message, key, command, key1):
+        self.bot.reply_to(message, "You can't choose this answer. Try again.")
+        self.bot.register_next_step_handler(message, self.insert_comics, key, command, key1)
+
+            
 # insert part starts
 
 
@@ -372,3 +491,22 @@ class insert_update_class(menu_class):
 # chooses
 
 # insert or update part ends
+# random part starts
+class random_class:
+    def random_command(self, message):
+        key = self.comics_db.get_random()
+        row = self.comics_db.print_comics(key)
+        markup = types.InlineKeyboardMarkup()
+        btn1 = types.InlineKeyboardButton('Save', callback_data='save')
+        markup.add(btn1)
+        saved.clear()
+        saved.append(key)
+        user_id.clear()
+        user_id.append(message.chat.id)
+        print(user_id)
+        l = ([x[0] for x in self.comics_db.select_user(user_id)])
+        database_id.clear()
+        database_id.append(l[0])
+        self.bot.reply_to(message, self.print_info(row[0]), disable_notification=True, reply_markup=markup)
+            
+# random part ends
