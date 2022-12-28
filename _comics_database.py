@@ -345,5 +345,195 @@ class DBRandom:
         self.mydb.commit()
         return mylist
 
-    
+class DBFinding:
+
+    def find_adaptation(self):
+        cursor = self.mydb.cursor()
+        sql = "SELECT DISTINCT adaptation.type FROM comics1.adaptation ORDER BY type"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        return mylist
+
+    def find_artist(self):
+        cursor = self.mydb.cursor()
+        sql = "SELECT DISTINCT artist.surname FROM comics1.artist ORDER BY surname"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        return mylist
+
+    def find_author(self):
+        cursor = self.mydb.cursor()
+        sql = "SELECT DISTINCT author.surname FROM comics1.author ORDER BY surname"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        return mylist
+
+    def find_genre(self):
+        cursor = self.mydb.cursor()
+        sql = "SELECT DISTINCT genre.name FROM comics1.genre ORDER BY name"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        return mylist
+
+    def find_kind(self):
+        cursor = self.mydb.cursor()
+        sql = "SELECT DISTINCT kind.name FROM comics1.kind ORDER BY name"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        return mylist
+
+    def find_translation(self):
+        cursor = self.mydb.cursor()
+        sql = "SELECT DISTINCT translation.language FROM comics1.translation ORDER BY language"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        return mylist
+
+
+class DBSorting:
+
+    def sort_adaptation(self, value):
+        cursor = self.mydb.cursor()
+        sql = "SELECT comics.name FROM comics\
+    JOIN adaptation ON comics.adaptation_idadaptation = adaptation.idadaptation\
+    WHERE adaptation.type = %s  ORDER BY comics.name"
+        cursor.execute(sql, value)
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        return mylist
+
+    def sort_artist(self, value):
+        cursor = self.mydb.cursor()
+        sql = "SELECT comics.name FROM comics\
+    JOIN artist ON comics.artist_idartist = artist.idartist\
+    WHERE artist.surname = %s ORDER BY comics.name"
+        cursor.execute(sql, value)
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        return mylist
+
+    def sort_author(self, value):
+        cursor = self.mydb.cursor()
+        sql = "SELECT comics.name FROM comics\
+    JOIN author ON comics.author_idauthor = author.idauthor\
+    WHERE author.surname = %s ORDER BY comics.name"
+        cursor.execute(sql, value)
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        return mylist
+
+    def sort_comic(self):
+        cursor = self.mydb.cursor()
+        sql = "SELECT name FROM comics1.comics ORDER BY name"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        return mylist
+
+    def sort_genre(self, value):
+        cursor = self.mydb.cursor()
+        sql = "SELECT comics.name FROM comics\
+    JOIN genre ON comics.genre_idgenre = genre.idgenre \
+    WHERE genre.name = %s ORDER BY comics.name"
+        cursor.execute(sql, value)
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        return mylist
+
+    def sort_kind(self, value):
+        cursor = self.mydb.cursor()
+        sql = "SELECT comics.name FROM comics\
+    JOIN kind ON comics.kind_idkind = kind.idkind\
+    WHERE kind.name = %s ORDER BY comics.name"
+        cursor.execute(sql, value)
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        return mylist
+
+    def sort_translation(self, value):
+        cursor = self.mydb.cursor()
+        sql = "SELECT comics.name FROM comics\
+    JOIN translation ON comics.translation_idtranslation = translation.idtranslation\
+    WHERE translation.language = %s ORDER BY translation.language"
+        cursor.execute(sql, value)
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        return mylist    
  
+class DBRecommend:
+
+    def find_idauthor_recommend(self, value):
+        cursor = self.mydb.cursor()
+        sql = "SELECT comics.author_idauthor FROM comics WHERE comics.name = %s"
+        cursor.execute(sql, value)
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        val = self.find_author_recommend(mylist)
+        return val
+
+    def find_author_recommend(self, value):
+        cursor = self.mydb.cursor()
+        sql = "SELECT comics.name FROM comics WHERE comics.author_idauthor = %s"
+        cursor.execute(sql, int(value[0][0]))
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        return mylist
+
+    def find_idgenre_recommend(self, value):
+        cursor = self.mydb.cursor()
+        sql = "SELECT comics.genre_idgenre FROM comics WHERE comics.name = %s"
+        cursor.execute(sql, value)
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        val = self.find_genre_recommend(mylist)
+        return val
+
+    def find_genre_recommend(self, value):
+        cursor = self.mydb.cursor()
+        sql = "SELECT comics.name FROM comics WHERE comics.genre_idgenre = %s"
+        cursor.execute(sql, int(value[0][0]))
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        return mylist
+
+    def find_idartist_recommend(self, value):
+        cursor = self.mydb.cursor()
+        sql = "SELECT comics.artist_idartist FROM comics WHERE comics.name = %s"
+        cursor.execute(sql, value)
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        val = self.find_artist_recommend(mylist)
+        return val
+
+    def find_artist_recommend(self, value):
+        cursor = self.mydb.cursor()
+        sql = "SELECT comics.name FROM comics WHERE comics.artist_idartist = %s"
+        cursor.execute(sql, int(value[0][0]))
+        result = cursor.fetchall()
+        mylist = list(result)
+        self.mydb.commit()
+        return mylist
