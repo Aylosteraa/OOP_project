@@ -326,7 +326,24 @@ class DBPrinting:
         myresult = mycursor.fetchall()
         return myresult
     
+    
+class DBRandom:
 
+    def get_random(self):
+        cursor = self.mydb.cursor()
+        sql = "SELECT comics.idcomics FROM comics"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        mylist = list()
+        mylist += ([x[0] for x in result])
+        value = random.randrange(len(mylist))
+        sql = "SELECT comics.name FROM comics WHERE comics.idcomics = %s"
+        cursor.execute(sql, [mylist[value]])
+        result = cursor.fetchall()
+        mylist = list()
+        mylist += ([x[0] for x in result])
+        self.mydb.commit()
+        return mylist
 
     
  
