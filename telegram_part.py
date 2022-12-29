@@ -3,9 +3,9 @@ import telebot
 from telebot import custom_filters
 from telebot import types
 
-TOKEN = 'TOKEN'
+TOKEN = '5810534433:AAFq-ytXxgbJA1fdF2km_UwlsLRX1yFPjgo'
 
-admin_id = [1234]  # your telegram id
+admin_id = [123456789]  # your telegram id
 
 btn_list = ['title', 'author', 'artist', 'genre', 'periodicity', 'magazine',
             'chapters', 'status', 'colorization', 'kind', 'adaptation', 'translation', 'end', 'menu']
@@ -140,7 +140,103 @@ class menu_class:
         self.bot.reply_to(message, "You can't choose this answer. Try again.")
         self.bot.register_next_step_handler(message, self.insert_comics, key, command, key1)
 
-            
+
+# delete part
+class delete_class:
+    def delete_command(self, message):
+        self.bot.reply_to(message, "Enter title of comic to delete it")
+        self.bot.register_next_step_handler(message, self.in_database)
+
+    def delete_comics(self, message, value):
+        key = [value]
+        self.bot.reply_to(message, 'Comics was deleted')
+        self.comics_db.delete_comic(key)
+
+    def in_database(self, message):
+        key = message.text.lower()
+        if self.comics_db.search_comics([key]):
+            self.print_comic(message)
+            self.bot.reply_to(message, 'Do you want to delete this comic? (yes or no)')
+            self.bot.register_next_step_handler(message, self.delete_or_not, key)
+        elif key in command_list:
+            self.command_choose(message, key)
+        else:
+            markup = self.menu_keyboard(message)
+            self.bot.reply_to(message, "Sorry, I don't find your comic.\n\nIf you want to try againt enter /delete.",
+                              reply_markup=markup)
+
+    def delete_or_not(self, message, key):
+        value = message.text.lower()
+        if value == 'yes':
+            self.delete_comics(message, key)
+            self.menu_command(message)
+        elif value in command_list:
+            self.command_choose(message, value)
+        elif value == 'no':
+            markup = self.menu_keyboard(message)
+            self.bot.reply_to(message, "If you want to try againt enter /delete.", reply_markup=markup)
+        else:
+            markup = self.menu_keyboard(message)
+            self.bot.reply_to(message, "I don't recognize your command.\n\nIf you want to try againt enter /delete.",
+                              reply_markup=markup)
+
+
+# delete part end
+
+# print part starts
+class print_class:
+    def print_command(self, message):
+        self.bot.reply_to(message, "Enter title of comics to print it")
+        self.bot.register_next_step_handler(message, self.print_in_database)
+
+    def print_info(self, mylist):
+        title = f'Title: {mylist[0].upper()}\n'
+        chapters = f'Chapters: {mylist[1]}\n'
+        author = f'Author: {mylist[2].capitalize()} {mylist[3].capitalize()}\n'
+        artist = f'Artist: {mylist[4].capitalize()} {mylist[5].capitalize()}\n'
+        kind = f'Kind: {mylist[6].capitalize()}\n'
+        genre = f'Genre: {mylist[8].capitalize()}\n'
+        periodicity = f'Periodicity: {mylist[9].capitalize()}\n'
+        magazine = f'Magazine: {mylist[10].upper()}\n'
+        status = f'Status: {mylist[11].capitalize()}\n'
+        colorization = f'Colorization: {mylist[12].capitalize()}\n'
+        adaptation = f'Adaptation: {mylist[13].capitalize()}\n'
+        translation = f'Translation: {mylist[14].upper()} ({mylist[15]})\n'
+        return f'{title}{chapters}{author}{artist}{kind}{genre}{periodicity}{magazine}{status}{colorization}{adaptation}{translation}'
+
+    def print_comic(self, message, command=1):
+        key = [message.text]
+        row = self.comics_db.print_comics(key)
+        if command == '/search':
+            markup = types.InlineKeyboardMarkup()
+            btn1 = types.InlineKeyboardButton('Save', callback_data='save')
+            markup.add(btn1)
+            saved.clear()
+            saved.append(key)
+            user_id.clear()
+            user_id.append(message.chat.id)
+            print(user_id)
+            l = ([x[0] for x in self.comics_db.select_user(user_id)])
+            database_id.clear()
+            database_id.append(l[0])
+            self.bot.reply_to(message, self.print_info(row[0]), disable_notification=True, reply_markup=markup)
+        else:
+            self.bot.reply_to(message, self.print_info(row[0]))
+
+    def print_in_database(self, message):
+        key = message.text.lower()
+        if self.comics_db.search_comics([key]):
+            self.print_comic(message, '/search')
+            self.ask_recommendation(message)
+        elif key in command_list:
+            self.command_choose(message, key)
+        else:
+            self.bot.reply_to(message, "Sorry, I don't find your comic.\n\nYou can try to /search again.")
+
+
+# print part ends
+
+
 # insert part starts
 
 
@@ -491,26 +587,6 @@ class insert_update_class(menu_class):
 # chooses
 
 # insert or update part ends
-# random part starts
-class random_class:
-    def random_command(self, message):
-        key = self.comics_db.get_random()
-        row = self.comics_db.print_comics(key)
-        markup = types.InlineKeyboardMarkup()
-        btn1 = types.InlineKeyboardButton('Save', callback_data='save')
-        markup.add(btn1)
-        saved.clear()
-        saved.append(key)
-        user_id.clear()
-        user_id.append(message.chat.id)
-        print(user_id)
-        l = ([x[0] for x in self.comics_db.select_user(user_id)])
-        database_id.clear()
-        database_id.append(l[0])
-        self.bot.reply_to(message, self.print_info(row[0]), disable_notification=True, reply_markup=markup)
-            
-# random part ends
-
 # sort part starts
 class sort_class(print_class, menu_class):
     def sort_command(self, message):
@@ -677,7 +753,7 @@ class sort_class(print_class, menu_class):
 
 # sort part ends
 
-# recommend part starts
+# sort part ends
 class recommend_class(print_class):
     def check_repeat(self, list, value):
         i = len(list) - 1
@@ -729,104 +805,28 @@ class recommend_class(print_class):
             markup = self.make_buttons(recommend_list, markup)
             self.bot.send_message(message.chat.id, 'Recommended\n', reply_markup=markup)
             self.bot.register_next_step_handler(message, self.print_in_database)
-            
-# recommend part ends
 
 
-# delete part
-class delete_class:
-    def delete_command(self, message):
-        self.bot.reply_to(message, "Enter title of comic to delete it")
-        self.bot.register_next_step_handler(message, self.in_database)
-
-    def delete_comics(self, message, value):
-        key = [value]
-        self.bot.reply_to(message, 'Comics was deleted')
-        self.comics_db.delete_comic(key)
-
-    def in_database(self, message):
-        key = message.text.lower()
-        if self.comics_db.search_comics([key]):
-            self.print_comic(message)
-            self.bot.reply_to(message, 'Do you want to delete this comic? (yes or no)')
-            self.bot.register_next_step_handler(message, self.delete_or_not, key)
-        elif key in command_list:
-            self.command_choose(message, key)
-        else:
-            markup = self.menu_keyboard(message)
-            self.bot.reply_to(message, "Sorry, I don't find your comic.\n\nIf you want to try againt enter /delete.",
-                              reply_markup=markup)
-
-    def delete_or_not(self, message, key):
-        value = message.text.lower()
-        if value == 'yes':
-            self.delete_comics(message, key)
-            self.menu_command(message)
-        elif value in command_list:
-            self.command_choose(message, value)
-        elif value == 'no':
-            markup = self.menu_keyboard(message)
-            self.bot.reply_to(message, "If you want to try againt enter /delete.", reply_markup=markup)
-        else:
-            markup = self.menu_keyboard(message)
-            self.bot.reply_to(message, "I don't recognize your command.\n\nIf you want to try againt enter /delete.",
-                              reply_markup=markup)
-
-
-# delete part end
-
-# print part starts
-class print_class:
-    def print_command(self, message):
-        self.bot.reply_to(message, "Enter title of comics to print it")
-        self.bot.register_next_step_handler(message, self.print_in_database)
-
-    def print_info(self, mylist):
-        title = f'Title: {mylist[0].upper()}\n'
-        chapters = f'Chapters: {mylist[1]}\n'
-        author = f'Author: {mylist[2].capitalize()} {mylist[3].capitalize()}\n'
-        artist = f'Artist: {mylist[4].capitalize()} {mylist[5].capitalize()}\n'
-        kind = f'Kind: {mylist[6].capitalize()}\n'
-        genre = f'Genre: {mylist[8].capitalize()}\n'
-        periodicity = f'Periodicity: {mylist[9].capitalize()}\n'
-        magazine = f'Magazine: {mylist[10].upper()}\n'
-        status = f'Status: {mylist[11].capitalize()}\n'
-        colorization = f'Colorization: {mylist[12].capitalize()}\n'
-        adaptation = f'Adaptation: {mylist[13].capitalize()}\n'
-        translation = f'Translation: {mylist[14].upper()} ({mylist[15]})\n'
-        return f'{title}{chapters}{author}{artist}{kind}{genre}{periodicity}{magazine}{status}{colorization}{adaptation}{translation}'
-
-    def print_comic(self, message, command=1):
-        key = [message.text]
+# random part starts
+class random_class:
+    def random_command(self, message):
+        key = self.comics_db.get_random()
         row = self.comics_db.print_comics(key)
-        if command == '/search':
-            markup = types.InlineKeyboardMarkup()
-            btn1 = types.InlineKeyboardButton('Save', callback_data='save')
-            markup.add(btn1)
-            saved.clear()
-            saved.append(key)
-            user_id.clear()
-            user_id.append(message.chat.id)
-            print(user_id)
-            l = ([x[0] for x in self.comics_db.select_user(user_id)])
-            database_id.clear()
-            database_id.append(l[0])
-            self.bot.reply_to(message, self.print_info(row[0]), disable_notification=True, reply_markup=markup)
-        else:
-            self.bot.reply_to(message, self.print_info(row[0]))
-
-    def print_in_database(self, message):
-        key = message.text.lower()
-        if self.comics_db.search_comics([key]):
-            self.print_comic(message, '/search')
-            self.ask_recommendation(message)
-        elif key in command_list:
-            self.command_choose(message, key)
-        else:
-            self.bot.reply_to(message, "Sorry, I don't find your comic.\n\nYou can try to /search again.")
+        markup = types.InlineKeyboardMarkup()
+        btn1 = types.InlineKeyboardButton('Save', callback_data='save')
+        markup.add(btn1)
+        saved.clear()
+        saved.append(key)
+        user_id.clear()
+        user_id.append(message.chat.id)
+        print(user_id)
+        l = ([x[0] for x in self.comics_db.select_user(user_id)])
+        database_id.clear()
+        database_id.append(l[0])
+        self.bot.reply_to(message, self.print_info(row[0]), disable_notification=True, reply_markup=markup)
 
 
-# print part ends
+# random part ends
 
 # save part starts
 class saved_class:
@@ -945,6 +945,5 @@ class Bot(Comic, delete_class, insert_update_class, sort_class, recommend_class,
         self.bot.infinity_polling()
 
 
-comics_db = Bot("localhost", "root", "password", "database")
+comics_db = Bot("localhost", "root", "vfhsyf10", "comics1")
 comics_db.run()
-
