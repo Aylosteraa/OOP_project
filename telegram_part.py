@@ -1,6 +1,6 @@
 from _comics_database import Comic
 import telebot
-#from telebot import custom_filters
+from telebot import custom_filters
 from telebot import types
 
 TOKEN = '5810534433:AAFq-ytXxgbJA1fdF2km_UwlsLRX1yFPjgo'
@@ -941,7 +941,7 @@ class Bot(Comic, delete_class, insert_update_class, sort_class, recommend_class,
             self.saved_command(message)
 
     def run(self):
-        #self.bot.add_custom_filter(custom_filters.ChatFilter())
+        self.bot.add_custom_filter(custom_filters.ChatFilter())
         self.bot.infinity_polling()
 
 
