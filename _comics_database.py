@@ -131,7 +131,125 @@ class DBInserting:
         val.append('user')
         mycursor.execute(sql, val)
         self.mydb.commit()
-        
+
+
+class DBSelecting:
+
+    def select_name(self, key):
+        if not isinstance(key, str):
+            raise TypeError
+        return key
+
+    def select_num(self, key):
+        return key
+
+    def select_period(self, key, keyl):
+        mycursor = self.mydb.cursor()
+        sql = "SELECT idperiodicity FROM periodicity WHERE period = %s;"
+        mycursor.execute(sql, keyl)
+        l = mycursor.fetchall()
+        return l
+
+    def select_status(self, key, keyl):
+        mycursor = self.mydb.cursor()
+        sql = "SELECT idstatus FROM status WHERE name = %s;"
+        mycursor.execute(sql, keyl)
+        l = mycursor.fetchall()
+        return l
+
+    def select_color(self, key, keyl):
+        mycursor = self.mydb.cursor()
+        sql = "SELECT idcolourization FROM colourization WHERE name = %s;"
+        mycursor.execute(sql, keyl)
+        l = mycursor.fetchall()
+        return l
+
+    def select_kind(self, key, keyl):
+        mycursor = self.mydb.cursor()
+        sql = "SELECT idkind FROM kind WHERE name = %s;"
+        mycursor.execute(sql, keyl)
+        l = mycursor.fetchall()
+        return l
+
+    def select_adapt(self, key, keyl):
+        mycursor = self.mydb.cursor()
+        sql = "SELECT idadaptation FROM adaptation WHERE type = %s;"
+        mycursor.execute(sql, keyl)
+        l = mycursor.fetchall()
+        return l
+
+    def select_user(self, telegram_id):
+        mycursor = self.mydb.cursor()
+        sql = "SELECT iduser FROM user WHERE telegram_id = %s;"
+        mycursor.execute(sql, telegram_id)
+        l = mycursor.fetchall()
+        return l
+
+
+class DBDeleting:
+
+    def delete_comic(self, name):
+        mycursor = self.mydb.cursor()
+        sql = "DELETE FROM comics WHERE idcomics = %s;"
+        val = self.search_comics(name)
+        vall = list()
+        vall += ([x[0] for x in val])
+        mycursor.execute(sql, vall)
+        self.mydb.commit()
+
+
+class DBPrinting:
+
+    def print_comics(self, name):
+        mycursor = self.mydb.cursor()
+        sql = "SELECT\
+              comics.name AS ncomic,\
+              comics.num_chapter AS chapter,\
+              author.name AS nauthor,\
+              author.surname AS sauthor,\
+              artist.name AS nartist,\
+              artist.surname AS sartist,\
+              kind.name AS kname,\
+              genre.subgenre AS subgenre,\
+              genre.name AS gname,\
+              periodicity.period AS pperiod,\
+              magazine.title AS mtitle,\
+              status.name AS sname,\
+              colourization.name AS cname,\
+              adaptation.type AS atype,\
+              translation.language AS tlanguage,\
+              translation.legality AS tlegality\
+              FROM comics\
+              INNER JOIN genre ON comics.genre_idgenre = genre.idgenre\
+              INNER JOIN author ON comics.author_idauthor = author.idauthor\
+              INNER JOIN artist ON comics.artist_idartist = artist.idartist\
+              INNER JOIN periodicity ON comics.periodicity_idperiodicity = periodicity.idperiodicity\
+              INNER JOIN magazine ON comics.magazine_idmagazine = magazine.idmagazine\
+              INNER JOIN status ON comics.status_idstatus = status.idstatus\
+              INNER JOIN colourization ON comics.colourization_idcolourization = colourization.idcolourization\
+              INNER JOIN kind ON comics.kind_idkind = kind.idkind\
+              INNER JOIN adaptation ON comics.adaptation_idadaptation = adaptation.idadaptation\
+              INNER JOIN translation ON comics.translation_idtranslation = translation.idtranslation\
+              WHERE idcomics = %s;"
+        vall = list()
+        if isinstance(name[0], str):
+            val = self.search_comics(name)
+            vall += ([x[0] for x in val])
+        else:
+            vall += name
+        mycursor.execute(sql, vall)
+        myresult = mycursor.fetchall()
+        return myresult
+
+    def print_user(self, id):
+        mycursor = self.mydb.cursor()
+        sql = "SELECT liked FROM user WHERE iduser = %s;"
+        vall = list()
+        vall.append(id)
+        mycursor.execute(sql, vall)
+        myresult = mycursor.fetchall()
+        return myresult
+
 
 class DBUpdating:
 
@@ -260,90 +378,8 @@ class DBUpdating:
         vall.append(liked)
         vall.append(idus)
         mycursor.execute(sql, vall)
-        self.mydb.commit()       
- 
-class DBDeleting:
-
-    def delete_comic(self, name):
-        mycursor = self.mydb.cursor()
-        sql = "DELETE FROM comics WHERE idcomics = %s;"
-        val = self.search_comics(name)
-        vall = list()
-        vall += ([x[0] for x in val])
-        mycursor.execute(sql, vall)
         self.mydb.commit()
 
-
-class DBPrinting:
-
-    def print_comics(self, name):
-        mycursor = self.mydb.cursor()
-        sql = "SELECT\
-              comics.name AS ncomic,\
-              comics.num_chapter AS chapter,\
-              author.name AS nauthor,\
-              author.surname AS sauthor,\
-              artist.name AS nartist,\
-              artist.surname AS sartist,\
-              kind.name AS kname,\
-              genre.subgenre AS subgenre,\
-              genre.name AS gname,\
-              periodicity.period AS pperiod,\
-              magazine.title AS mtitle,\
-              status.name AS sname,\
-              colourization.name AS cname,\
-              adaptation.type AS atype,\
-              translation.language AS tlanguage,\
-              translation.legality AS tlegality\
-              FROM comics\
-              INNER JOIN genre ON comics.genre_idgenre = genre.idgenre\
-              INNER JOIN author ON comics.author_idauthor = author.idauthor\
-              INNER JOIN artist ON comics.artist_idartist = artist.idartist\
-              INNER JOIN periodicity ON comics.periodicity_idperiodicity = periodicity.idperiodicity\
-              INNER JOIN magazine ON comics.magazine_idmagazine = magazine.idmagazine\
-              INNER JOIN status ON comics.status_idstatus = status.idstatus\
-              INNER JOIN colourization ON comics.colourization_idcolourization = colourization.idcolourization\
-              INNER JOIN kind ON comics.kind_idkind = kind.idkind\
-              INNER JOIN adaptation ON comics.adaptation_idadaptation = adaptation.idadaptation\
-              INNER JOIN translation ON comics.translation_idtranslation = translation.idtranslation\
-              WHERE idcomics = %s;"
-        vall = list()
-        if isinstance(name[0], str):
-            val = self.search_comics(name)
-            vall += ([x[0] for x in val])
-        else:
-            vall += name
-        mycursor.execute(sql, vall)
-        myresult = mycursor.fetchall()
-        return myresult
-
-    def print_user(self, id):
-        mycursor = self.mydb.cursor()
-        sql = "SELECT liked FROM user WHERE iduser = %s;"
-        vall = list()
-        vall.append(id)
-        mycursor.execute(sql, vall)
-        myresult = mycursor.fetchall()
-        return myresult
-    
-    
-class DBRandom:
-
-    def get_random(self):
-        cursor = self.mydb.cursor()
-        sql = "SELECT comics.idcomics FROM comics"
-        cursor.execute(sql)
-        result = cursor.fetchall()
-        mylist = list()
-        mylist += ([x[0] for x in result])
-        value = random.randrange(len(mylist))
-        sql = "SELECT comics.name FROM comics WHERE comics.idcomics = %s"
-        cursor.execute(sql, [mylist[value]])
-        result = cursor.fetchall()
-        mylist = list()
-        mylist += ([x[0] for x in result])
-        self.mydb.commit()
-        return mylist
 
 class DBFinding:
 
@@ -477,8 +513,28 @@ class DBSorting:
         result = cursor.fetchall()
         mylist = list(result)
         self.mydb.commit()
-        return mylist    
- 
+        return mylist
+
+
+class DBRandom:
+
+    def get_random(self):
+        cursor = self.mydb.cursor()
+        sql = "SELECT comics.idcomics FROM comics"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        mylist = list()
+        mylist += ([x[0] for x in result])
+        value = random.randrange(len(mylist))
+        sql = "SELECT comics.name FROM comics WHERE comics.idcomics = %s"
+        cursor.execute(sql, [mylist[value]])
+        result = cursor.fetchall()
+        mylist = list()
+        mylist += ([x[0] for x in result])
+        self.mydb.commit()
+        return mylist
+
+
 class DBRecommend:
 
     def find_idauthor_recommend(self, value):
@@ -537,8 +593,8 @@ class DBRecommend:
         mylist = list(result)
         self.mydb.commit()
         return mylist
-    
-    
+
+
 class Comic(DBSeaching, DBInserting, DBSelecting, DBDeleting, DBPrinting, DBUpdating, DBFinding, DBSorting, DBRandom,
             DBRecommend):
 
