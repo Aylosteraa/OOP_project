@@ -537,3 +537,15 @@ class DBRecommend:
         mylist = list(result)
         self.mydb.commit()
         return mylist
+    
+    
+class Comic(DBSeaching, DBInserting, DBSelecting, DBDeleting, DBPrinting, DBUpdating, DBFinding, DBSorting, DBRandom,
+            DBRecommend):
+
+    def __init__(self, set_host, set_name, set_password, set_database):
+        self.mydb = pymysql.connect(
+            host=set_host,
+            user=set_name,
+            password=set_password,
+            database=set_database
+        )
