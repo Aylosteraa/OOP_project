@@ -945,5 +945,5 @@ class Bot(Comic, delete_class, insert_update_class, sort_class, recommend_class,
         self.bot.infinity_polling()
 
 
-comics_db = Bot("localhost", "root", "vfhsyf10", "comics1")
+comics_db = Bot("localhost", "root", "ріа", "comics1")
 comics_db.run()
